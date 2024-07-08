@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import generics, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -80,9 +81,16 @@ class BaseTaskAPIView(generics.UpdateAPIView):
 
 class TaskAPIAssign(BaseTaskAPIView):
     def handle_update(self, serializer, instance, request):
-        route_name = request.resolver_match.url_name
-        if route_name == 'task-assign':
-            serializer.instance = serializer.assign_task(instance)
+        serializer.instance = serializer.assign_task(instance)
+
+
+class TaskAPIComplete(BaseTaskAPIView):
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(employee=user.id)
+
+    def handle_update(self, serializer, instance, request):
+        serializer.instance = serializer.complete_task(instance, serializer.validated_data)
 
 
 class TaskAPIUpdate(BaseTaskAPIView):
@@ -91,6 +99,5 @@ class TaskAPIUpdate(BaseTaskAPIView):
         return Task.objects.filter(employee=user.id)
 
     def handle_update(self, serializer, instance, request):
-        route_name = request.resolver_match.url_name
-        if route_name == 'task-complete':
-            serializer.instance = serializer.complete_task(instance, serializer.validated_data)
+        instance.updated_date = timezone.now().date()
+        instance.save()

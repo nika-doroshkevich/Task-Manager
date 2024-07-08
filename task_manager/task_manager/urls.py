@@ -20,8 +20,8 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('sky-drones/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('sky-drones/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('task-manager/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('task-manager/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('task-manager/', include('app_users.urls')),
     path('task-manager/', include('tasks.urls')),
 ]
