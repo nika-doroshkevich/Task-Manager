@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
-from rest_framework import status, permissions
+from rest_framework import status, permissions, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from app_users.serializers import UserCreateSerializer, UserLoginSerializer
-from task_manager.utils import RoleEmployeeBasedPermission
+from app_users.serializers import UserCreateSerializer, UserLoginSerializer, UserSerializer
+from task_manager.utils import RoleEmployeeBasedPermission, RoleCustomerBasedPermission
 
 UserModel = get_user_model()
 
@@ -24,3 +24,17 @@ class UserAPICreate(APIView):
 class UserLogin(TokenObtainPairView):
     serializer_class = UserLoginSerializer
     permission_classes = (permissions.AllowAny,)
+
+
+class UserList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated, RoleCustomerBasedPermission,)
+    queryset = UserModel.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserRetrieve(generics.RetrieveAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user

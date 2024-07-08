@@ -1,5 +1,6 @@
+import datetime
+
 from django.db import models
-from django.utils import timezone
 
 from app_users.models import AppUser
 from tasks.utils import TaskStatuses
@@ -12,7 +13,7 @@ class Task(models.Model):
                                  related_name='tasks_as_employee')
     customer = models.ForeignKey(AppUser, null=True, on_delete=models.PROTECT,
                                  related_name='tasks_as_customer')
-    created_date = models.DateField(default=timezone.now().date())
+    created_date = models.DateField(default=datetime.date.today)
     updated_date = models.DateField(blank=True, null=True)
     completed_date = models.DateField(blank=True, null=True)
     report = models.TextField(blank=True, null=True)

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model, authenticate
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -12,9 +13,18 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = '__all__'
 
-    def create(self, data):
-        user_obj = UserModel.objects.create_user(email=data['email'], password=data['password'],
-                                                 full_name=data['full_name'], phone=data['phone'], role=data['role'])
+    def create(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if not email or UserModel.objects.filter(email=email).exists():
+            raise ValidationError({"detail": "Please choose another email"})
+
+        if not password or len(password) < 8:
+            raise ValidationError({"detail": "Please choose another password, min 8 characters"})
+
+        user_obj = UserModel.objects.create_user(email=attrs['email'], password=attrs['password'],
+                                                 full_name=attrs['full_name'], phone=attrs['phone'], role=attrs['role'])
         user_obj.save()
         return user_obj
 
@@ -28,6 +38,10 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         password = attrs.get('password')
 
         user = authenticate(email=email, password=password)
+
+        if user is None:
+            raise serializers.ValidationError({"detail": "Неверные логин или пароль"})
+
         user.last_login = timezone.now()
         user.save()
 
@@ -35,3 +49,9 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         token['id'] = user.id
         return token
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = '__all__'
