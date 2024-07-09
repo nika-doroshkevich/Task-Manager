@@ -13,7 +13,6 @@ venv/
 *.python-version
 .coverage
 *.sw[po]
-*.sqlite3
 
 # IDE support
 .vscode

@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  task_manager:
+    container_name: task_manager
+    build: .
+    ports:
+      - "8000:8000"
